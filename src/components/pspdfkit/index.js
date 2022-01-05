@@ -1,61 +1,39 @@
-import React, { Component } from "react";
-import PSPDFKitWeb from "pspdfkit";
+import React from 'react';
+import PSPDFKitWeb from 'pspdfkit';
 
-export default class PSPDFKit extends Component {
-  constructor(props, context) {
-    super(props, context);
-    this._instance = null;
-    this._container = null;
+export const PSPDFKit = () => {
+	const handleChange = async (event) => {
+		const files = event.target.files;
 
-    this.onRef = this.onRef.bind(this);
-    this.load = this.load.bind(this);
-    this.unload = this.unload.bind(this);
-  }
+		if (files) {
+			const documentFileObjectUrl = URL.createObjectURL(files[0]);
 
-  onRef(container) {
-    this._container = container;
-  }
+			await PSPDFKitWeb.load({
+				document: documentFileObjectUrl,
+				container: '.uploadPdf',
+			}).then((instance) => {
+				console.log('Successfully mounted PSPDFKit: ', instance);
+			});
+		}
+	};
 
-  async load(props) {
-    console.log(`Loading ${props.documentUrl}`);
-
-    this._instance = await PSPDFKitWeb.load({
-      document: props.documentUrl,
-      container: this._container,
-      baseUrl: props.baseUrl,
-    });
-    console.log("Successfully mounted PSPDFKit", this._instance);
-  }
-
-  unload() {
-    PSPDFKitWeb.unload(this._instance || this._container);
-    this._instance = null;
-  }
-
-  componentDidMount() {
-    this.load(this.props);
-  }
-
-  componentDidUpdate(prevProps) {
-    const nextProps = this.props;
-
-    // We only want to reload the document when the documentUrl prop changes.
-    if (nextProps.documentUrl !== prevProps.documentUrl) {
-      this.unload();
-      this.load(nextProps);
-    }
-  }
-
-  componentWillUnmount() {
-    this.unload();
-  }
-
-  render() {
-    return (
-      <div
-        ref={this.onRef}
-        style={{ width: "100%", height: "100%", position: "absolute" }}
-      />
-    );
-  }
-}
+	return (
+		<div>
+			<p>PSPDFKit is working?</p>
+			<input
+				type="file"
+				style={{ display: 'none' }}
+				id="uploadPdf"
+				onChange={handleChange}
+				className="uploadPdf"
+			/>
+			<label
+				htmlFor="uploadPdf"
+				style={{ background: '#FFD580', padding: '3px' }}
+			>
+				Upload pdf
+			</label>
+		</div>
+	);
+};
+export default PSPDFKit;
